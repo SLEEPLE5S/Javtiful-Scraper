@@ -1,18 +1,17 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
 import logging
 import os
 from pathlib import Path
-import subprocess
 from urllib.parse import urlsplit, urlunsplit
 
 from bs4 import BeautifulSoup
 
+from .porndb import PornDB
 from .util import format_bytes, format_duration
 from .args import Args
 from .enums import HTTPRequestType, HTTPResponseType
 from .http_client import HTTPClient
-from .models import Actress, HTTPRequest, HTTPResponse
+from .models import Actress, HTTPRequest, HTTPResponse, PornDBResponse
 
 
 class Scraper:
@@ -20,6 +19,7 @@ class Scraper:
         self._logger = logging.getLogger(__name__)
         self._args = Args()
         self._http_client = HTTPClient()
+        self._porndb = PornDB()
     
     def scrape(self):
         for url in self._args.urls:
@@ -36,30 +36,14 @@ class Scraper:
         return urlunsplit(parts._replace(query=""))
     
     def _handle_video(self, url: str, actress: Actress | None = None) -> HTTPResponse | None:
-        def get_added_on(soup: BeautifulSoup) -> datetime | None:
-            detail_list = soup.find("div", {"class": "front-watch-detail-list"})
-            if not detail_list: return None
-            
-            time = detail_list.find("time")
-            if not time: return None
-            
-            dt = time.get("datetime")
-            
-            try:
-                return datetime.fromisoformat(str(dt))
-            
-            except ValueError:
-                return None
-        
-        def get_file_path(added_on: datetime, code: str) -> Path:
+        def get_file_path(search_result: PornDBResponse) -> Path:
             path = self._args.download_path
             
             if actress:
                 path = self._args.download_path / actress.name
 
             filename = (
-                f"[{added_on:%Y-%m-%d}] "
-                f"{code}.mp4"
+                f"{search_result.date} {search_result.title}.mp4"
             )
 
             return path / filename
@@ -89,6 +73,7 @@ class Scraper:
             parts = code.split("-")[:2]
             
             return "-".join(parts).upper()
+            
         
         request = HTTPRequest(
             url = url,
@@ -101,21 +86,24 @@ class Scraper:
             return
         
         direct_url = get_direct_url(response.data)
-        added_on = get_added_on(response.data)
         poster_url = get_poster(response.data)
         code = get_code(url)
         
         if (
             not direct_url
-            or not added_on
             or not poster_url
         ):
             self._logger.error(f"Failed to extract data from {url}")
             return
         
+        # Search for the file name and date using PornDB
+        search_result = self._porndb.search(code)
         
-        # Download the video
-        file_path = get_file_path(added_on, code)
+        if not search_result:
+            self._logger.error(f"{code:<10} Failed to find in PornDB")
+            return None
+        
+        file_path = get_file_path(search_result)
         
         # Download the poster
         if self._args.posters:

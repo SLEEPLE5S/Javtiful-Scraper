@@ -1,6 +1,9 @@
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
+import os
+from dotenv import load_dotenv
+
 from .singleton import Singleton
 
 class Args(ArgumentParser, metaclass = Singleton):
@@ -16,6 +19,9 @@ class Args(ArgumentParser, metaclass = Singleton):
         self.posters: bool = _args.posters
         self.profile: bool = _args.profile
         self.workers: int = _args.workers
+        
+        load_dotenv(".env")
+        self.porndb_token = os.getenv("TPDB_TOKEN")
     
     def _parse(self) -> Namespace:
         self.add_argument(

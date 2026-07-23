@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 
 from bs4 import BeautifulSoup
@@ -18,6 +19,7 @@ class HTTPRequest:
     response_type: HTTPResponseType
     payload: dict = field(default_factory = dict)
     params: dict[str, str] = field(default_factory = dict)
+    headers: dict[str, str] = field(default_factory = dict)
 
 @dataclass
 class HTTPResponse:
@@ -35,3 +37,8 @@ class HTTPResponse:
 class Actress:
     name: str
     profile_url: str
+
+@dataclass
+class PornDBResponse:
+    title: str
+    date: str

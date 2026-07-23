@@ -51,6 +51,7 @@ class HTTPClient(metaclass = Singleton):
                     url = request.url,
                     json = request.payload,
                     params = request.params,
+                    headers = request.headers,
                     timeout = self._args.timeout
                 )
             
@@ -61,6 +62,7 @@ class HTTPClient(metaclass = Singleton):
                 response = self._session.get(
                     url = request.url,
                     params = request.params,
+                    headers = request.headers,
                     timeout = self._args.timeout
                 )
         
