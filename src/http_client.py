@@ -156,7 +156,7 @@ class HTTPClient(metaclass = Singleton):
                     unit = "B",
                     unit_scale = True,
                     unit_divisor = 1024,
-                    desc = f"Downloading {destination.name:<30}",
+                    desc = f"Downloading {destination.name:.10s}",
                     leave = False,
                     bar_format = (
                         "{desc}: {percentage:3.0f}%|{bar}| "
