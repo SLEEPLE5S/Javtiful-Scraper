@@ -42,9 +42,12 @@ class Scraper:
             if actress:
                 path = self._args.download_path / actress.name
 
-            filename = (
-                f"{search_result.date} {search_result.title}.mp4"
-            )
+            extension = ".mp4"
+            max_filename_length = 254
+
+            filename = f"{search_result.date} {search_result.title}"
+
+            filename = filename[:max_filename_length - len(extension)] + extension
 
             return path / filename
         
