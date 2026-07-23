@@ -43,7 +43,7 @@ class Scraper:
                 path = self._args.download_path / actress.name
 
             extension = ".mp4"
-            max_filename_length = 254
+            max_filename_length = 230
 
             filename = f"{search_result.date} {search_result.title}"
 
