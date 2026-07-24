@@ -39,7 +39,7 @@ class PornDB(metaclass = Singleton):
         except IndexError:
             return self._try_scenes(code)
         
-        return self._parse_data(first_match, PornDBCategory.JAV)
+        return self._parse_data(first_match, PornDBCategory.JAV, code)
 
     def _try_scenes(self, code: str) -> None | PornDBResponse:
         request = HTTPRequest(
@@ -66,7 +66,7 @@ class PornDB(metaclass = Singleton):
         except IndexError:
             return self._try_movies(code)
         
-        return self._parse_data(first_match, PornDBCategory.SCENES)
+        return self._parse_data(first_match, PornDBCategory.SCENES, code)
     
     def _try_movies(self, code: str) -> None | PornDBResponse:
         request = HTTPRequest(
@@ -93,10 +93,10 @@ class PornDB(metaclass = Singleton):
         except IndexError:
             return None
         
-        return self._parse_data(first_match, PornDBCategory.MOVIES)
+        return self._parse_data(first_match, PornDBCategory.MOVIES, code)
         
-    def _parse_data(self, first_match: dict, category: PornDBCategory) -> PornDBResponse | None:
-        title = first_match.get("title")
+    def _parse_data(self, first_match: dict, category: PornDBCategory, code: str) -> PornDBResponse | None:
+        title = code
         date = first_match.get("date")
         
         if (
