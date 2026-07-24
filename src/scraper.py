@@ -78,11 +78,17 @@ class Scraper:
             
             return "https://javtiful.com" + poster_url
         
-        def get_code(url: str) -> str:
-            code = url.split("/")[-1]
-            parts = code.split("-")[:2]
+        def get_code(soup: BeautifulSoup) -> str | None:
+            title = soup.find("div", {"class": "front-watch-title mt-3"})
+            if not title: return None
             
-            return "-".join(parts).upper()
+            h1 = title.find("h1")
+            if not h1: return None
+            
+            title = h1.get_text()
+            if not title: return None
+            
+            return title.split(" ")[0]
             
         
         request = HTTPRequest(
@@ -97,11 +103,12 @@ class Scraper:
         
         direct_url = get_direct_url(response.data)
         poster_url = get_poster(response.data)
-        code = get_code(url)
+        code = get_code(response.data)
         
         if (
             not direct_url
             or not poster_url
+            or not code
         ):
             self._logger.error(f"Failed to extract data from {url}")
             return
