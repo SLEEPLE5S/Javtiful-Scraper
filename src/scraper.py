@@ -113,7 +113,7 @@ class Scraper:
         
         # Download the poster
         if self._args.posters:
-            poster_path = file_path.parent / file_path.with_stem(f"{file_path.stem}-poster").with_suffix(".jpeg").name
+            poster_path = file_path.parent / file_path.with_stem(f"{file_path.stem}").with_suffix(".jpeg").name
             request = HTTPRequest(
                 url = poster_url,
                 request_type = HTTPRequestType.DOWNLOAD,
