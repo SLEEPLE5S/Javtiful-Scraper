@@ -156,12 +156,17 @@ class HTTPClient(metaclass = Singleton):
                     unit = "B",
                     unit_scale = True,
                     unit_divisor = 1024,
-                    desc = f"Downloading {destination.name:.10s}",
+                    desc = f"Downloading {destination.name:.40s}",
                     leave = False,
+                    dynamic_ncols = True,
+                    ascii = "━╸",
                     bar_format = (
-                        "{desc}: {percentage:3.0f}%|{bar}| "
-                        "{n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]"
+                        "{desc} "
+                        "{percentage:3.0f}% {bar} "
+                        "{n_fmt}/{total_fmt} "
+                        "[{elapsed}<{remaining}, {rate_fmt}]"
                     ),
+                    colour = "green"
                 )
                 if show_progress
                 else nullcontext()
