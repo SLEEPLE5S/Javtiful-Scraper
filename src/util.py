@@ -1,3 +1,5 @@
+import re
+
 def format_duration(seconds: float) -> str:
     if seconds < 1:
         return f"{seconds * 1000:.0f}ms"
@@ -25,3 +27,6 @@ def format_bytes(amount: int) -> str:
         value /= 1024
 
     return f"{value:.2f} PB"
+
+def sanitise_string(value: str) -> str:
+    return re.sub(r'[<>:"/\\|?*\x00-\x1F]', " ", value)

@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from .porndb import PornDB
 from .util import format_bytes, format_duration
 from .args import Args
-from .enums import HTTPRequestType, HTTPResponseType
+from .enums import HTTPRequestType, HTTPResponseType, PornDBCategory
 from .http_client import HTTPClient
 from .models import Actress, HTTPRequest, HTTPResponse, PornDBResponse
 
@@ -36,17 +36,24 @@ class Scraper:
         return urlunsplit(parts._replace(query=""))
     
     def _handle_video(self, url: str, actress: Actress | None = None) -> HTTPResponse | None:
-        def get_file_path(search_result: PornDBResponse) -> Path:
-            path = self._args.download_path
-            
+        def get_file_path(search_result: PornDBResponse) -> Path:            
+            match search_result.category:
+                case PornDBCategory.JAV:
+                    path = self._args.jav_path
+                
+                case PornDBCategory.SCENES:
+                    path = self._args.scenes_path
+                
+                case PornDBCategory.MOVIES:
+                    path = self._args.movies_path
+                            
             if actress:
-                path = self._args.download_path / actress.name
+                path = path / actress.name
 
             extension = ".mp4"
             max_filename_length = 230
 
             filename = f"{search_result.date} {search_result.title}"
-
             filename = filename[:max_filename_length - len(extension)] + extension
 
             return path / filename
@@ -208,19 +215,6 @@ class Scraper:
             
             urls.extend(videos_in_page)
             index += 1
-        
-        # Download the profile url to the actress directory
-        if self._args.profile:
-            actress_directory = self._args.download_path / name
-            request = HTTPRequest(
-                url = profile_url,
-                request_type = HTTPRequestType.DOWNLOAD,
-                response_type = HTTPResponseType.DICT,
-                payload = {
-                    "destination": actress_directory / "profile.jpeg"
-                }
-            )
-            response = self._http_client.send(request)
         
         # Download all the videos using a thread pool
         actress = Actress(name, profile_url)

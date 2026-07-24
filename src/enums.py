@@ -17,3 +17,8 @@ class HTTPStatusCode(Enum):
     SOUP_FAIL = 409
     DICT_FAIL = 410
     EXISTS_FAIL = 411
+
+class PornDBCategory(Enum):
+    SCENES = "scenes"
+    JAV = "jav"
+    MOVIES = "movies"

@@ -4,7 +4,7 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-from .enums import HTTPRequestType, HTTPResponseType, HTTPStatusCode
+from .enums import HTTPRequestType, HTTPResponseType, HTTPStatusCode, PornDBCategory
 
 @dataclass
 class HTTPDownloadData:
@@ -42,3 +42,4 @@ class Actress:
 class PornDBResponse:
     title: str
     date: str
+    category: PornDBCategory

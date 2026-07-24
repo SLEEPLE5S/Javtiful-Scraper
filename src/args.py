@@ -12,13 +12,15 @@ class Args(ArgumentParser, metaclass = Singleton):
         _args = self._parse()
         
         self.urls: list[str] = _args.urls
-        self.download_path = Path(_args.download_path)
         self.chunk_size: int = _args.chunk_size
         self.debug: bool = _args.debug
         self.timeout: int = _args.timeout
         self.posters: bool = _args.posters
-        self.profile: bool = _args.profile
         self.workers: int = _args.workers
+        
+        self.jav_path = Path(_args.jav_path)
+        self.scenes_path = Path(_args.scenes_path)
+        self.movies_path = Path(_args.movies_path)
         
         load_dotenv(".env")
         self.porndb_token = os.getenv("TPDB_TOKEN")
@@ -36,6 +38,27 @@ class Args(ArgumentParser, metaclass = Singleton):
             type = str,
             default = "./Downloads",
             help = "Directory to download files to."
+        )
+        
+        self.add_argument(
+            "--jav-path",
+            type = str,
+            default = "./Downloads/Jav",
+            help = "Directory to download jav files to."
+        )
+        
+        self.add_argument(
+            "--scenes-path",
+            type = str,
+            default = "./Downloads/Scenes",
+            help = "Directory to download scenes to."
+        )
+        
+        self.add_argument(
+            "--movies-path",
+            type = str,
+            default = "./Downloads/Movies",
+            help = "Directory to download movies to."
         )
         
         self.add_argument(
@@ -62,12 +85,6 @@ class Args(ArgumentParser, metaclass = Singleton):
             "--posters",
             action = "store_true",
             help = "Whether to download posters alongside the video."
-        )
-        
-        self.add_argument(
-            "--profile",
-            action = "store_true",
-            help = "Whether to download the profile image of the actress when downloading actresses."
         )
         
         self.add_argument(
