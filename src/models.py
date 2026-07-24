@@ -41,6 +41,5 @@ class Actress:
 @dataclass
 class PornDBResponse:
     title: str
-    date: str
     poster: str
     category: PornDBCategory
