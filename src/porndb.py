@@ -1,4 +1,5 @@
 import logging
+import os
 
 from .util import sanitise_string
 from .args import Args
@@ -98,11 +99,21 @@ class PornDB(metaclass = Singleton):
     def _parse_data(self, first_match: dict, category: PornDBCategory, code: str) -> PornDBResponse | None:
         title = code
         date = first_match.get("date")
+        posters = first_match.get("background")
         
         if (
             not isinstance(title, str)
             or not isinstance(date, str)
+            or not isinstance(posters, dict)
         ):
             return None
         
-        return PornDBResponse(sanitise_string(title), date.replace(" ", "-"), category)
+        poster = posters.get("full")
+        if not isinstance(poster, str): return None
+                        
+        return PornDBResponse(
+            sanitise_string(title),
+            date.replace(" ", "-"),
+            poster,
+            category
+        )

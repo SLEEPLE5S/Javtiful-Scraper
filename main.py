@@ -1,6 +1,3 @@
-import os
-
-from src.porndb import PornDB
 from src.scraper import Scraper
 from src.args import Args
 from src.logger import load_logger

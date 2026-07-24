@@ -6,6 +6,7 @@ from urllib.parse import urlsplit, urlunsplit
 
 from bs4 import BeautifulSoup
 
+from .image import Image
 from .porndb import PornDB
 from .util import format_bytes, format_duration
 from .args import Args
@@ -67,17 +68,6 @@ class Scraper:
             
             return str(source.get("src"))
         
-        def get_poster(soup: BeautifulSoup) -> str | None:
-            video = soup.find("video", {"id": "front-player"})
-            if not video: return None
-            
-            poster_url = video.get("poster")
-
-            if not isinstance(poster_url, str):
-                return None
-            
-            return "https://javtiful.com" + poster_url
-        
         def get_code(soup: BeautifulSoup) -> str | None:
             title = soup.find("div", {"class": "front-watch-title mt-3"})
             if not title: return None
@@ -102,12 +92,10 @@ class Scraper:
             return
         
         direct_url = get_direct_url(response.data)
-        poster_url = get_poster(response.data)
         code = get_code(response.data)
         
         if (
             not direct_url
-            or not poster_url
             or not code
         ):
             self._logger.error(f"Failed to extract data from {url}")
@@ -120,11 +108,12 @@ class Scraper:
             self._logger.error(f"{code:<10} Failed to find in PornDB")
             return None
         
+        poster_url = search_result.poster
         file_path = get_file_path(search_result)
         
         # Download the poster
         if self._args.posters:
-            poster_path = file_path.parent / file_path.with_suffix(".jpeg").name
+            poster_path = file_path.parent / file_path.with_stem(f"{file_path.stem}-poster").with_suffix(".jpeg").name
             request = HTTPRequest(
                 url = poster_url,
                 request_type = HTTPRequestType.DOWNLOAD,
@@ -134,6 +123,11 @@ class Scraper:
                 }
             )
             response = self._http_client.send(request)
+        
+            # Crop the poster to portrait
+            img = Image(poster_path)
+            img.crop_to_portrait()
+            img.close()
         
         # Download the video
         request = HTTPRequest(
@@ -178,6 +172,7 @@ class Scraper:
                 a = article.find("a")
                 if not a: continue
                 url = "https://javtiful.com" + str(a.get("href"))
+                
                 videos_in_page.append(url)
             
             return videos_in_page
@@ -204,7 +199,7 @@ class Scraper:
                 
         # Get URLs in all pages
         self._logger.info(f"{name:<15} Searching for posts...")
-        urls = []
+        urls: list[str] = []
         index = 1
         while True:
             if index != 1:
@@ -223,10 +218,18 @@ class Scraper:
             urls.extend(videos_in_page)
             index += 1
         
+        # Sanitise URLs to prefer reduced mosaic
+        for video_url in urls.copy():
+            if video_url.endswith("-reducing-mosaic"):
+                normal_url = video_url.removesuffix("-reducing-mosaic")
+                                
+                if normal_url in urls:
+                    urls.remove(normal_url)
+
         # Download all the videos using a thread pool
         actress = Actress(name, profile_url)
         downloads = []
-
+        
         with ThreadPoolExecutor(
             max_workers = self._args.workers,
             thread_name_prefix = "Actress-Thread"
