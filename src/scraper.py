@@ -51,12 +51,7 @@ class Scraper:
             if actress:
                 path = path / actress.name
 
-            extension = ".mp4"
-            max_filename_length = 230
-
-            filename = f"{search_result.date} {search_result.title}"
-            filename = filename[:max_filename_length - len(extension)] + extension
-
+            filename = f"{search_result.date} {search_result.title}.mp4"
             return path / filename
         
         def get_direct_url(soup: BeautifulSoup) -> str | None:

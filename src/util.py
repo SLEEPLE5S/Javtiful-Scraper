@@ -30,3 +30,6 @@ def format_bytes(amount: int) -> str:
 
 def sanitise_string(value: str) -> str:
     return re.sub(r'[<>:"/\\|?*\x00-\x1F]', " ", value)
+
+def limit_string(value: str, limit: int = 100) -> str:
+    return value[:limit]

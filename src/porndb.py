@@ -1,7 +1,7 @@
 import logging
 import os
 
-from .util import sanitise_string
+from .util import limit_string, sanitise_string
 from .args import Args
 from .singleton import Singleton
 from .enums import HTTPRequestType, HTTPResponseType, PornDBCategory
@@ -97,7 +97,7 @@ class PornDB(metaclass = Singleton):
         return self._parse_data(first_match, PornDBCategory.MOVIES, code)
         
     def _parse_data(self, first_match: dict, category: PornDBCategory, code: str) -> PornDBResponse | None:
-        title = code
+        title = first_match.get("title")
         date = first_match.get("date")
         posters = first_match.get("background")
         
@@ -112,7 +112,7 @@ class PornDB(metaclass = Singleton):
         if not isinstance(poster, str): return None
                         
         return PornDBResponse(
-            sanitise_string(title),
+            sanitise_string(limit_string(title)),
             date.replace(" ", "-"),
             poster,
             category
