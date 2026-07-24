@@ -99,9 +99,11 @@ class PornDB(metaclass = Singleton):
     def _parse_data(self, first_match: dict, category: PornDBCategory, code: str) -> PornDBResponse | None:
         title = first_match.get("title")
         posters = first_match.get("background")
+        date = first_match.get("date")
         
         if (
             not isinstance(title, str)
+            or not isinstance(date, str)
             or not isinstance(posters, dict)
         ):
             return None
@@ -112,5 +114,6 @@ class PornDB(metaclass = Singleton):
         return PornDBResponse(
             sanitise_string(limit_string(title)),
             poster,
-            category
+            date,
+            category,
         )

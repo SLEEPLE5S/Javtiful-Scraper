@@ -51,7 +51,7 @@ class Scraper:
             if actress:
                 path = path / actress.name
 
-            filename = f"{search_result.title}.mp4"
+            filename = f"{search_result.date} {search_result.title}.mp4"
             return path / filename
         
         def get_direct_url(soup: BeautifulSoup) -> str | None:

@@ -42,4 +42,5 @@ class Actress:
 class PornDBResponse:
     title: str
     poster: str
+    date: str
     category: PornDBCategory
