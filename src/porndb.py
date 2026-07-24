@@ -20,7 +20,7 @@ class PornDB(metaclass = Singleton):
             request_type = HTTPRequestType.GET,
             response_type = HTTPResponseType.DICT,
             params = {
-                "parse": code
+                "external_id": code
             },
             headers = {
                 "Authorization": f"Bearer {self._args.porndb_token}"
