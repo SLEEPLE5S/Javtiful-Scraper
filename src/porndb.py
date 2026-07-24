@@ -97,7 +97,7 @@ class PornDB(metaclass = Singleton):
         return self._parse_data(first_match, PornDBCategory.MOVIES, code)
         
     def _parse_data(self, first_match: dict, category: PornDBCategory, code: str) -> PornDBResponse | None:
-        title = first_match.get("title")
+        title = code
         date = first_match.get("date")
         posters = first_match.get("background")
         
