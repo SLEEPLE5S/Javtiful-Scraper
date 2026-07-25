@@ -17,14 +17,21 @@ class PornDB(metaclass = Singleton):
         self.url = "https://api.theporndb.net"
     
     def search(self, code: str) -> tuple[dict, Category] | None:
-        data = self.search_jav(code)
-        if data: return data, Category.JAV
+        data = self.search_jav(code)        
+        if data:
+            if data.get("data"):
+                return data, Category.JAV
+        
         
         data = self.search_scenes(code)
-        if data: return data, Category.SCENES
+        if data:
+            if data.get("data"):
+                return data, Category.SCENES
         
         data = self.search_movies(code)
-        if data: return data, Category.MOVIES
+        if data:
+            if data.get("data"):
+                return data, Category.MOVIES
         
         return None
     
