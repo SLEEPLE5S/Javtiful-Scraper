@@ -11,7 +11,6 @@ class ConsoleFormatter(logging.Formatter):
     LEVEL = "\x1b[34m"
     NAME = "\x1b[35m"
     THREAD = "\x1b[36m"
-    RED = "\x1b[31m"
     BOLD_WHITE = "\x1b[1;37m"
     RESET = "\x1b[0m"
 
@@ -26,7 +25,7 @@ class ConsoleFormatter(logging.Formatter):
         level_str = f"{self.LEVEL}{level:<8}{self.RESET}"
         name_str = f"{self.NAME}{name.upper():<30}{self.RESET}"
         thread_str = f"{self.NAME}{thread}{self.RESET}"
-        end_str = f" {self.RED}>>{self.RESET}"
+        end_str = f" {self.LEVEL}>>{self.RESET}"
         msg_str = re.sub(
             r"\*(.*?)\*",
             lambda m: f"{self.BOLD_WHITE}{m.group(1)}{self.RESET}",
