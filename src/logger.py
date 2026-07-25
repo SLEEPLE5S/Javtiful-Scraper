@@ -23,7 +23,7 @@ class ConsoleFormatter(logging.Formatter):
 
         time_str = f"{self.TIME}{time}{self.RESET}"
         level_str = f"{self.LEVEL}{level:<8}{self.RESET}"
-        name_str = f"{self.NAME}{name.upper():<30}{self.RESET}"
+        name_str = f"{self.NAME}{name.upper():<20}{self.RESET}"
         thread_str = f"{self.NAME}{thread}{self.RESET}"
         end_str = f" {self.LEVEL}>>{self.RESET}"
         msg_str = re.sub(
