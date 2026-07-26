@@ -206,6 +206,6 @@ class Session(requests.Session, metaclass = Singleton):
         speed_str = f"{SPEED}{f'{mbps:.2f} Mbps':^15}{RESET}"
         
         tqdm.write(
-            f"{time_str} {size_str} {speed_str} {destination.name}"
+            f"{time_str} {size_str} {speed_str} {destination.parent.name + "/" + destination.name}"
         )
         
