@@ -29,6 +29,9 @@ class Javtiful:
             if "/actress/" in url:
                 self.scrape_actress(url)
     
+            if "/channel/" in url:
+                self.scrape_actress(url)
+    
     def scrape_video(
             self,
             url: str,

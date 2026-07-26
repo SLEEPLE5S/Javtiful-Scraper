@@ -32,7 +32,7 @@ class Session(requests.Session, metaclass = Singleton):
             )
         })
     
-        tqdm.set_lock(RLock())
+        #tqdm.set_lock(RLock())
     
     def get_soup(
             self,
