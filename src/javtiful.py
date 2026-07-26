@@ -104,6 +104,9 @@ class Javtiful:
             case Category.MOVIES:
                 base_path = self.config.movie_path
         
+        if code not in site_name:
+            site_name = f"{code} {site_name}"
+        
         file_name = Path(sanitise_filename(f"{site_name} {date} {title}"[:240]))
         
         if actress_name:
