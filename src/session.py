@@ -1,14 +1,18 @@
+from contextlib import nullcontext
 import logging
-import os
 from pathlib import Path
+import re
+from threading import RLock
 import time
 
 from bs4 import BeautifulSoup
 import requests
+from tqdm import tqdm
 
 from src.singleton import Singleton
 from src.config import Config
 from src.util import format_bytes, format_duration
+from src.logger import ConsoleFormatter
 
 class Session(requests.Session, metaclass = Singleton):
     def __init__(self):
@@ -27,6 +31,8 @@ class Session(requests.Session, metaclass = Singleton):
                 ";q=0.8"
             )
         })
+    
+        tqdm.set_lock(RLock())
     
     def get_soup(
             self,
@@ -105,13 +111,12 @@ class Session(requests.Session, metaclass = Singleton):
         
         temp_destination.parent.mkdir(parents = True, exist_ok = True)
         start_time = time.perf_counter()
-        
-        self.logger.info(f"{code:<15} Downloading...")
-        
+                
         with self.get(
             url = url,
             headers = headers,
             timeout = self.config.timeout,
+            stream = True,
         ) as r:
             if r.status_code not in (200, 206):
                 self.logger.warning(f"{f'[{r.status_code}]':<10} Failed to download from {url}")
@@ -125,11 +130,51 @@ class Session(requests.Session, metaclass = Singleton):
             mode = "ab" if downloaded_bytes else "wb"
             total_size = r.headers.get("Content-Length", 0)
             total_size = int(total_size) + downloaded_bytes if total_size else 0
+            to_download = int(total_size) - downloaded_bytes if total_size else 0
             
-            with open(temp_destination, mode) as f:
-                for chunk in r.iter_content(self.config.chunk_size):
-                    if chunk:
-                        f.write(chunk)
+            show_progress = total_size >= 50 * 1024 * 1024
+
+            match = re.match(r"^(.*?)\s+(\d{4}-\d{2}-\d{2})\s+(.*)$", destination.stem)
+
+            if not match:
+                return None
+
+            title = match.group(3)
+            
+            progress_context = (
+                tqdm(
+                    total=total_size,
+                    initial=downloaded_bytes,
+                    unit="B",
+                    unit_scale=True,
+                    unit_divisor=1024,
+                    desc=f"\x1b[1;36m{code:<.15}\x1b[0m",
+                    leave=False,
+                    dynamic_ncols=True,
+                    ascii="━╸",
+                    bar_format=(
+                        "{desc}"
+                        "\x1b[1;32m{percentage:3.0f}%\x1b[0m "
+                        "{bar} "
+                        "\x1b[1;37m{n_fmt}\x1b[0m/"
+                        "\x1b[1;90m{total_fmt}\x1b[0m "
+                        "\x1b[1;90m[{elapsed}<{remaining}]\x1b[0m "
+                        "\x1b[1;33m{rate_fmt}\x1b[0m"
+                    ),
+                    colour="green",
+                )
+                if show_progress
+                else nullcontext()
+            )
+            
+            with progress_context as progress:
+                with open(temp_destination, mode) as f:
+                    for chunk in r.iter_content(self.config.chunk_size):
+                        if chunk:
+                            f.write(chunk)
+                            
+                            if progress:
+                                progress.update(len(chunk))
         
         time_taken = time.perf_counter() - start_time
         
@@ -139,8 +184,28 @@ class Session(requests.Session, metaclass = Singleton):
         else:
             temp_destination.rename(destination)
         
-        self.logger.info(
-            f"{format_bytes(total_size):^10} | {format_duration(time_taken):^10} Downloaded {destination}"
-        )
         
+        self.log_completion(time_taken, total_size, to_download, destination)
+    
+    def log_completion(
+            self,
+            time_taken: float, 
+            total_size: int, 
+            downloaded: int, 
+            destination: Path
+    ):
+        mbps = (downloaded * 8) / (1024 * 1024) / time_taken
+        
+        TIME  = "\x1b[1;36m"
+        SIZE  = "\x1b[1;33m"
+        SPEED = "\x1b[1;32m"
+        RESET = "\x1b[0m"
+        
+        time_str = f"{TIME}{format_duration(time_taken):^10}{RESET}"
+        size_str = f"{SIZE}{format_bytes(total_size):^12}{RESET}"
+        speed_str = f"{SPEED}{f'{mbps:.2f} Mbps':^15}{RESET}"
+        
+        tqdm.write(
+            f"{time_str} {size_str} {speed_str} {destination.name}"
+        )
         

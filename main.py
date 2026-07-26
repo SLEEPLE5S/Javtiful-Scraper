@@ -5,5 +5,6 @@ from src.javtiful import Javtiful
 c = Config()
 logger = load_logger(c.debug)
 
+
 j = Javtiful()
 j.run()

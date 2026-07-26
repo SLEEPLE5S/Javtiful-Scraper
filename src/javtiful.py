@@ -105,15 +105,15 @@ class Javtiful:
                 base_path = self.config.movie_path
         
         if code not in title:
-            title = f"{code} {title}"
+            title = f"{code.upper()} {title}"
         
         file_name = Path(sanitise_filename(f"{site_name} {date} {title}"[:240]))
         
         if actress_name:
-            file_path = base_path / actress_name / file_name.with_suffix(".mp4")
+            file_path = base_path / actress_name / Path(f"{file_name}.mp4")
         
         else:
-            file_path = base_path / file_name.with_suffix(".mp4")
+            file_path = base_path / Path(f"{file_name}.mp4")
         
         self.session.download(src, file_path, code.upper())
     
